@@ -1,0 +1,65 @@
+function mypertd14(t)
+
+global lastchange  ltcT1 ltcT2 
+global intstep VP_nos VQ_nos tcorr Exload P0 Q0  P00 Q00;
+
+
+ltcT1 =300.0;
+ltcT2 =0.5;
+
+
+P00=[0.049000000000000
+   0.550000000000000
+   1.500000000000000
+   0.500000000000000
+   0.303800000000000
+   0.156800000000000
+   0.669200000000000
+   0.208600000000000
+   0.085400000000000
+   0.126000000000000
+   0.600000000000000];
+ 
+Q00=[0.025200000000000
+   0.081200000000000
+   0.266000000000000
+   0.022400000000000
+   0.177800000000000
+   0.105000000000000
+   0.056000000000000
+   0.070000000000000
+   0.022400000000000
+   0.081200000000000
+   0.232400000000000];
+
+ind=[4,9];
+
+if abs(t-intstep)<0.0001
+    P0=P00;
+    Q0=Q00;
+end
+
+gamma    = 1/tcorr;
+nos_std  = 0.01*sqrt(2*gamma);   % intensity of noise is 0.01^2 
+
+rnd_vec  = randn(size(Exload.con,1),1);
+VP_nos   =  VP_nos*(1 - gamma * intstep) + nos_std * sqrt(intstep) * rnd_vec;
+VQ_nos   =  VQ_nos*(1 - gamma * intstep) + nos_std * sqrt(intstep) * rnd_vec;
+
+
+
+if t<380
+if(t>=ltcT1)
+    if(t>lastchange+ltcT2)
+P0(ind)=P0(ind)+0.001*P00(ind);
+Q0(ind)=Q0(ind)+0.001*Q00(ind);
+lastchange=t;
+    end
+end
+end
+
+Exload.dat(:,1) = P0.*(1+VP_nos);       
+
+Exload.dat(:,2)= Q0.*(1+VQ_nos);       
+
+end
